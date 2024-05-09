@@ -1,0 +1,5 @@
+[flake8]
+ignore = W503,E203
+exclude = alembic_scripts
+max-line-length = 120
+import-order-style = pep8
