@@ -2,17 +2,16 @@ from datetime import datetime as dt
 from http import HTTPStatus
 from logging import config as logging_config
 
-import uvicorn
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from redis.asyncio import Redis
-
 import core.tracer as tracer
+import uvicorn
 from api.v1 import auth, oauth, roles, user_role
 from core.logger import LOGGING
 from core.settings import settings
 from db import redis
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from redis.asyncio import Redis
 
 app = FastAPI(
     title='API авторизаций',
@@ -34,37 +33,37 @@ app.include_router(
 )
 
 
-# @app.middleware('http')
-# async def rate_limit_middleware(request: Request, call_next):
-#     pipe = redis.redis.pipeline()
-#     now = dt.now()
-#     remote_addr = request.headers.get('X-Real-IP')
-#     request_id = request.headers.get('X-Request-Id')
+@app.middleware('http')
+async def rate_limit_middleware(request: Request, call_next):
+    pipe = redis.redis.pipeline()
+    now = dt.now()
+    remote_addr = request.headers.get('X-Real-IP')
+    request_id = request.headers.get('X-Request-Id')
 
-#     if not request_id and settings.with_jaeger:
-#         return JSONResponse(
-#             status_code=HTTPStatus.BAD_REQUEST,
-#             content={'detail': 'X-Request-Id is required'},
-#         )
+    if not request_id and settings.with_jaeger:
+        return JSONResponse(
+            status_code=HTTPStatus.BAD_REQUEST,
+            content={'detail': 'X-Request-Id is required'},
+        )
 
-#     if not request_id == 'pytest':
-#         key = f'{remote_addr}:{now.minute}'
-#         pipe.incr(key, 1)
-#         pipe.expire(key, 59)
-#         result = await pipe.execute()
-#         request_number = result[0]
+    if not request_id == 'pytest':
+        key = f'{remote_addr}:{now.minute}'
+        pipe.incr(key, 1)
+        pipe.expire(key, 59)
+        result = await pipe.execute()
+        request_number = result[0]
 
-#         if request_number > settings.max_requests_per_minute:
-#             return JSONResponse(
-#                 status_code=HTTPStatus.TOO_MANY_REQUESTS,
-#                 content={'detail': 'User Rate Limit Exceeded'},
-#                 headers={
-#                     'Retry-After': f'{60 - now.second}',
-#                     'X-Rate-Limit': f'{settings.max_requests_per_minute}',
-#                 },
-#             )
+        if request_number > settings.max_requests_per_minute:
+            return JSONResponse(
+                status_code=HTTPStatus.TOO_MANY_REQUESTS,
+                content={'detail': 'User Rate Limit Exceeded'},
+                headers={
+                    'Retry-After': f'{60 - now.second}',
+                    'X-Rate-Limit': f'{settings.max_requests_per_minute}',
+                },
+            )
 
-#     return await call_next(request)
+    return await call_next(request)
 
 
 if __name__ == '__main__':
