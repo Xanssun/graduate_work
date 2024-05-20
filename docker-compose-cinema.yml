@@ -1,0 +1,40 @@
+version: '3.0'
+
+services:
+
+  kino_db:
+    image: postgres:13.4
+    container_name: "kino_db"
+    env_file:
+      - envs/common.env
+    environment:
+      POSTGRES_DB: ${KINO_DB_NAME}
+      POSTGRES_USER: ${KINO_DB_USER}
+      POSTGRES_PASSWORD: ${KINO_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-databases-cinema:/docker-entrypoint-initdb.d
+    networks:
+      - custom
+
+  kino_service:
+    image: "kino_service"
+    build: ./cinema_together
+    container_name: cinema_together
+    networks:
+      - custom
+    depends_on:
+      - kino_db
+    env_file:
+      - envs/common.env
+    ports:
+      - "8005:8005"
+    expose:
+      - "8005"
+
+networks:
+  custom:
+    driver: bridge
+
+volumes:
+  postgres_data:

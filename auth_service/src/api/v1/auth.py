@@ -1,20 +1,12 @@
 from http import HTTPStatus
 from typing import Annotated
 
+from core.tokens import security_access_token, security_refresh_token
 from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from fastapi.encoders import jsonable_encoder
-
-from core.tokens import security_access_token, security_refresh_token
 from models.entity import RefreshToken, Token
-from schemas.entity import (
-    AuthHistory,
-    ChangeCredentials,
-    HistoryResult,
-    Result,
-    UserCreate,
-    UserInDB,
-    UserSignIn,
-)
+from schemas.entity import (AuthHistory, ChangeCredentials, HistoryResult,
+                            Result, UserCreate, UserInDB, UserSignIn)
 from services.auth import AuthService, get_auth_service
 from validators.validate_email_and_password import validate_email_and_password
 
@@ -63,10 +55,6 @@ async def signin(
             status_code=HTTPStatus.FORBIDDEN,
             detail='Wrong email or password',
         )
-    #    response.set_cookie(key='token', value=tokens['token'], httponly=True)
-    #    response.set_cookie(
-    #        key='refresh_token', value=tokens['refresh_token'], httponly=True
-    #    )
     response.headers['X-Access-Token'] = tokens['token']
     response.headers['X-Refresh-Token'] = tokens['refresh_token']
 
