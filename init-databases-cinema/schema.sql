@@ -1,7 +1,7 @@
 CREATE SCHEMA IF NOT EXISTS cinema;
 CREATE TABLE IF NOT EXISTS cinema.rooms(
     id uuid PRIMARY KEY,
-    film_id TEXT NOT NULL,
+    film_id uuid NOT NULL,
     creator_id uuid NOT NULL,
     created_at timestamp NOT NULL,
     users uuid []
