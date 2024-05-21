@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS cinema.rooms(
     film_id TEXT NOT NULL,
     creator_id uuid NOT NULL,
     created_at timestamp NOT NULL,
-    users uuid [],
+    users uuid []
 );
 CREATE TABLE IF NOT EXISTS cinema.messages(
     id uuid PRIMARY KEY,
@@ -16,5 +16,5 @@ CREATE TABLE IF NOT EXISTS cinema.players(
     id uuid PRIMARY KEY,
     room_id uuid REFERENCES cinema.rooms(id),
     is_active BOOLEAN DEFAULT FALSE,
-    view_progress INT,
+    view_progress INT
 );
