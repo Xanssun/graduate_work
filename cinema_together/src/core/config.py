@@ -12,4 +12,5 @@ class Settings(BaseSettings):
     kino_db_host: str = '127.0.0.1'
     kino_db_port: str = '5432'
 
+
 settings = Settings()
