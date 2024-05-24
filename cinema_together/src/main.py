@@ -1,11 +1,16 @@
-import uvicorn
-from core.config import settings
-from db.postgres import async_session
+import logging
+from logging import config as logging_config
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
+import uvicorn
 
+from core.config import settings
+from core.logger import LOGGING
+from db.postgres import async_session
 from api.v1 import websocket
+
 
 app = FastAPI(
     title='API кино вместе',
@@ -13,6 +18,9 @@ app = FastAPI(
     openapi_url='/kino_api/openapi.json',
     default_response_class=JSONResponse,
 )
+
+logging_config.dictConfig(LOGGING)
+logger = logging.getLogger('')
 
 
 @app.get("/")

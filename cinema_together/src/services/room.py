@@ -11,8 +11,11 @@ class Room:
             self._message_processing(message)
             await connection.send_json(message)
 
-    async def connect(self, websocket: WebSocket):
+    @staticmethod
+    async def connect(websocket: WebSocket):
         await websocket.accept()
+
+    async def add_connection(self, websocket: WebSocket):
         self.connections.append(websocket)
 
     async def disconnect(self, websocket: WebSocket):
