@@ -1,11 +1,14 @@
 from datetime import datetime
 from functools import lru_cache
-from typing import List, Optional
+from typing import List, Optional, Union
 from uuid import UUID
 
 from db.postgres import get_session
-from fastapi import Depends, HTTPException
-from models.entity import Room
+from fastapi import Depends, HTTPException, WebSocket
+from models.entity import Message, Player, Room
+from pydantic import ValidationError
+from shemas.msg_player import (ChatSchema, ErrorSchema, PlayerSchema,
+                               parse_message)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -34,6 +37,49 @@ class RoomService:
 
     async def get(self, room_id: UUID) -> Optional[Room]:
         return await self.db_session.get(Room, room_id)
+
+    async def complete(self, room_id: UUID, creator_id: UUID) -> Room:
+        query = select(Room).filter(Room.id == room_id, Room.creator_id == creator_id, Room.is_active_room == True)
+        result = await self.db_session.execute(query)
+        room = result.scalars().first()
+
+        if not room:
+            raise HTTPException(status_code=404, detail="Room not found or already completed")
+
+        room.is_active_room = False
+        room.completed_at = datetime.utcnow()
+        await self.db_session.commit()
+        return room
+
+    async def parser_json(
+        self,
+        websocket: WebSocket,
+        room: Room,
+        user_id: UUID,
+        message: Union[ChatSchema, PlayerSchema],
+    ):
+        async for json_data in websocket.iter_json():
+            try:
+                message = parse_message(json_data)
+                if isinstance(message, ChatSchema):
+                    new_message = Message(
+                        user_id=user_id,
+                        room_id=room.id,
+                        created_at=datetime.utcnow(),
+                        message=message.message
+                    )
+                    room.messages.append(new_message)
+                    # Save the message to the database
+                    await self.db_session.add(new_message)
+                    await self.db_session.commit()
+
+                elif isinstance(message, PlayerSchema):
+                    # Process player action (you can add your logic here)
+                    pass
+
+                yield message
+            except (ValueError, ValidationError) as e:
+                await websocket.send_json(ErrorSchema(message=str(e)).dict())
 
 @lru_cache
 def get_room_service(

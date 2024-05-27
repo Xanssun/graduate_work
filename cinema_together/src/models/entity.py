@@ -15,9 +15,10 @@ class Room(Base):
     film_id = Column(UUID(as_uuid=True), nullable=False)
     creator_id = Column(UUID(as_uuid=True), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, default=datetime.utcnow)
     users = Column(ARRAY(UUID(as_uuid=True)))
     is_active_room = Column(Boolean, default=True)  # Добавлено поле активности
-    message = relationship('Message', back_populates='room')
+    messages = relationship('Message', back_populates='room')
     player = relationship('Player', back_populates='room')
 
 
@@ -30,7 +31,8 @@ class Message(Base):
                      ForeignKey('rooms.id', ondelete='CASCADE'),
                      nullable=False)
     message = Column(String, nullable=False)
-    room = relationship('Room', back_populates='message')
+    created_at = Column(DateTime, default=datetime.utcnow)  # Добавлено поле created_at
+    room = relationship('Room', back_populates='messages')
 
 
 class Player(Base):

@@ -51,3 +51,21 @@ async def get_room_info(
         created_at=str(room_info.created_at),
         users=[str(user) for user in room_info.users],
     )
+
+@router.post(
+    '/{room_id}/complete',
+    response_model=RoomResponseShema,
+    status_code=HTTPStatus.OK,
+    summary='Завершить комнату',
+    description='Завершить комнату',
+)
+async def complete_room(
+    data: RoomRequestShema, # временно
+    room_id: str,
+    request: Request,
+    # token: dict = Depends(security_access_token),
+    room_service: RoomService = Depends(get_room_service)
+) -> RoomResponseShema:
+    # creator_id = token.get('user_id')
+    room = await room_service.complete(room_id=room_id, creator_id=data.creator_id)
+    return RoomResponseShema(msg='Комната завершена', room_id=str(room.id))
