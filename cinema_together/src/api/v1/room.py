@@ -51,7 +51,6 @@ async def get_room_info(
         'film_id': str(room_info.film_id),
         'creator_id': str(room_info.creator_id),
         'created_at': str(room_info.created_at),
-        'users': [str(user) for user in room_info.users],
     }
     return JSONResponse(content=response_data)
 
