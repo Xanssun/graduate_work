@@ -6,7 +6,7 @@ from .base import OrjsonBaseModel
 
 class RoomRequestShema(OrjsonBaseModel):
     film_id: UUID
-    creator_id: UUID  # Предполагаем, что creator_id передается с фронта
+    creator_id: UUID
     users: list[UUID]
 
 

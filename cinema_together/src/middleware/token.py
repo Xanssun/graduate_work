@@ -46,7 +46,7 @@ class AccessBearer(HTTPBearer):
     def __init__(self, auto_error: bool = False):
         super().__init__(auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> Optional[dict]:
+    async def __call__(self, request: Request) -> Optional[Token]:
         credentials: HTTPAuthorizationCredentials = await super().__call__(request)
         if credentials:
             if not credentials.scheme == 'Bearer':
@@ -69,7 +69,7 @@ class AccessBearer(HTTPBearer):
         )
 
     @staticmethod
-    def _parse_token(jwt_token: str) -> Optional[dict]:
+    def _parse_token(jwt_token: str) -> Optional[Token]:
         token = Token(token=jwt_token)
         print(token)
         if not token.is_expired():
