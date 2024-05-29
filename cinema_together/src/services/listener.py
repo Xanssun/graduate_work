@@ -16,7 +16,6 @@ class Listener:
         self.listener_task: Task
 
     async def subscribe(self, room_id: str, q: Queue):
-        print('we are subscribed')
         if self.subscribers.get(room_id):
             self.subscribers[room_id].append(q)
         else:
@@ -34,7 +33,6 @@ class Listener:
                     message = await conn.notifies.get()
                     message_json = json.loads(message.payload)
                     room_id = message_json.get('room_id')
-                    print(self.subscribers)
                     for q in self.subscribers[room_id]:
                         await q.put(message)
 

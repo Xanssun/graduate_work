@@ -4,7 +4,6 @@ import asyncio
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 
 from services.websocket import WSManager
-from services.listener import global_listener
 
 
 router = APIRouter()
