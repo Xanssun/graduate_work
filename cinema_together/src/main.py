@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 import logging
 from logging import config as logging_config
 
@@ -10,6 +11,17 @@ from core.config import settings
 from core.logger import LOGGING
 from db.postgres import async_session
 from api.v1 import websocket
+from services import listener
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    listener.global_listener = listener.Listener()
+    await listener.global_listener.start_listening()
+    logger.info('start Listener')
+    yield
+    await listener.global_listener.start_listening()
+    logger.info('stop Listener')
 
 
 app = FastAPI(
@@ -17,6 +29,7 @@ app = FastAPI(
     docs_url='/kino_api/openapi',
     openapi_url='/kino_api/openapi.json',
     default_response_class=JSONResponse,
+    lifespan=lifespan
 )
 
 logging_config.dictConfig(LOGGING)

@@ -30,6 +30,8 @@ services:
       - kino_db
     env_file:
       - envs/common.env
+    environment:
+      - PYTHONUNBUFFERED=TRUE
     ports:
       - ${KINO_API_PORT}:${KINO_API_PORT}
 
