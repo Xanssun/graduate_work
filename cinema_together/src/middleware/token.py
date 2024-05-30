@@ -42,6 +42,7 @@ class Token:
     def __repr__(self) -> str:
         return f"<Token {self.user_id}, roles = {', '.join(self.role)}, expires = {self.expires}>"
 
+
 class AccessBearer(HTTPBearer):
     def __init__(self, auto_error: bool = False):
         super().__init__(auto_error=auto_error)
@@ -75,5 +76,6 @@ class AccessBearer(HTTPBearer):
         if not token.is_expired():
             return token
         return None
+
 
 security_access_token = AccessBearer()

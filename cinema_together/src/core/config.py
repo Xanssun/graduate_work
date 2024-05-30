@@ -14,10 +14,9 @@ class Settings(BaseSettings):
     kino_db_port: str = '5432'
 
     kino_psql_dsn: PostgresDsn = Field(
-        'postgres://root:123qwe@kino_db:5432/kino_database', alias='DB_DSN'
+        'postgres://root:123qwe@kino_db:5432/kino_database', alias='PSQL_DSN'
     )
-
-
     auth_secret: str = 'privedmedved'
+
 
 settings = Settings()

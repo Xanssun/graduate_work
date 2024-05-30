@@ -3,11 +3,12 @@ from http import HTTPStatus
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse
 from middleware.token import Token, security_access_token
-from service.room import RoomService, get_room_service
+from services.room import RoomService, get_room_service
 from shemas.room import (RoomInfoResponseShema, RoomRequestShema,
                          RoomResponseShema)
 
 router = APIRouter()
+
 
 @router.post(
     '/',

@@ -8,9 +8,12 @@ import uvicorn
 
 from core.config import settings
 from core.logger import LOGGING
-from db.postgres import async_session
 from api.v1 import websocket, room
 from services import listener
+
+
+logging_config.dictConfig(LOGGING)
+logger = logging.getLogger('')
 
 
 @asynccontextmanager
@@ -30,10 +33,6 @@ app = FastAPI(
     default_response_class=HTMLResponse,
     lifespan=lifespan
 )
-
-logging_config.dictConfig(LOGGING)
-logger = logging.getLogger('')
-
 
 
 app.include_router(room.router, prefix='/kino_api/v1/cinema', tags=['cinema'])
