@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     kino_psql_dsn: PostgresDsn = Field(
         'postgres://root:123qwe@kino_db:5432/kino_database', alias='PSQL_DSN'
     )
+    kino_sqlalchemy_dsn: PostgresDsn = Field(
+        'postgresql+asyncpg://root:123qwe@kino_db:5432/kino_database'
+    )
     auth_secret: str = 'privedmedved'
 
 

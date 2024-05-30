@@ -20,7 +20,6 @@ services:
       POSTGRES_PASSWORD: ${KINO_DB_PASSWORD}
     volumes:
       - kino_postgres_data:/var/lib/postgresql/data
-      - ./init-databases-cinema:/docker-entrypoint-initdb.d
 
   kino_service:
     <<: *common
@@ -44,9 +43,9 @@ services:
       - auth_postgres_data:/var/lib/postgresql/data
       - ./init-databases:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - ${AUTH_DB_PORT}:${AUTH_DB_PORT}
     expose:
-      - "5432"
+      - ${AUTH_DB_PORT}
 
   nginx:
     <<: *common
@@ -59,7 +58,7 @@ services:
       - auth_service
       - jaeger
     ports:
-      - "80:80"
+      - ${NGINX_PORT}:${NGINX_PORT}
 
   auth_service:
     <<: *common
@@ -71,9 +70,9 @@ services:
     env_file:
       - envs/common.env
     ports:
-      - "8002:8002"
+      - ${AUTH_API_PORT}:${AUTH_API_PORT}
     expose:
-      - "8002"
+      - ${AUTH_API_PORT}
 
   jaeger:
     <<: *common
@@ -82,8 +81,8 @@ services:
     env_file:
       - envs/common.env
     ports:
-      - "6831:6831/udp"
-      - "16686:16686"
+      - "${JAEGER_PORT}:${JAEGER_PORT}/udp"
+      - ${JAEGER_PORT_2}:${JAEGER_PORT_2}
 
   redis:
     <<: *common
@@ -91,9 +90,9 @@ services:
     container_name: redis
     restart: always
     ports:
-      - "6379:6379"
+      - ${REDIS_PORT}:${REDIS_PORT}
     expose:
-      - "6379"
+      - ${REDIS_PORT}
 
 networks:
   custom:

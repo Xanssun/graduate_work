@@ -24,7 +24,6 @@ class Listener:
     async def start_listening(self):
         self.listener_task = asyncio.create_task(self._listener())
 
-    # Возможно передавать сюда уже коннкшн, а не создавать его внутри
     async def _listener(self) -> None:
         async with aiopg.connect(dsn=str(settings.kino_psql_dsn)) as conn:
             async with conn.cursor() as cur:
