@@ -18,4 +18,6 @@ class Settings(BaseSettings):
     )
 
 
+    auth_secret: str = 'privedmedved'
+
 settings = Settings()

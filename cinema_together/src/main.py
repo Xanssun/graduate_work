@@ -3,14 +3,13 @@ import logging
 from logging import config as logging_config
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from sqlalchemy import text
+from fastapi.responses import HTMLResponse
 import uvicorn
 
 from core.config import settings
 from core.logger import LOGGING
 from db.postgres import async_session
-from api.v1 import websocket
+from api.v1 import websocket, room
 from services import listener
 
 
@@ -28,7 +27,7 @@ app = FastAPI(
     title='API кино вместе',
     docs_url='/kino_api/openapi',
     openapi_url='/kino_api/openapi.json',
-    default_response_class=JSONResponse,
+    default_response_class=HTMLResponse,
     lifespan=lifespan
 )
 
@@ -36,17 +35,8 @@ logging_config.dictConfig(LOGGING)
 logger = logging.getLogger('')
 
 
-@app.get("/")
-async def read_root():
-    """Проверка соеденения, тестовая функция"""
-    async with async_session() as session:
-        try:
-            await session.execute(text("SELECT 1"))
-            return {"Соединение с базой данных установлено!"}
-        except Exception as e:
-            return JSONResponse(status_code=500, content={"message": f"Ошибка подключения к базе данных: {str(e)}"})
 
-
+app.include_router(room.router, prefix='/kino_api/v1/cinema', tags=['cinema'])
 app.include_router(websocket.router, prefix='/api/v1/ws', tags=['websocket'])
 
 

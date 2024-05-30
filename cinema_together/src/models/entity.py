@@ -1,19 +1,11 @@
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 from db.postgres import Base
-from sqlalchemy import Column, String, Integer, DateTime, ARRAY, ForeignKey, Boolean
-from sqlalchemy.orm import relationship
+from sqlalchemy import (ARRAY, Boolean, Column, DateTime, ForeignKey, Integer,
+                        String)
 from sqlalchemy.dialects.postgresql import UUID
-
-
-class User(Base):
-    """Тестовая модель юзер для теста миграций"""
-    __tablename__ = "User"
-
-    user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String, nullable=False)
-    email = Column(String, nullable=False, unique=True)
+from sqlalchemy.orm import relationship
 
 
 class Room(Base):
@@ -23,8 +15,10 @@ class Room(Base):
     film_id = Column(UUID(as_uuid=True), nullable=False)
     creator_id = Column(UUID(as_uuid=True), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, default=datetime.utcnow)
     users = Column(ARRAY(UUID(as_uuid=True)))
-    message = relationship('Message', back_populates='room')
+    is_active_room = Column(Boolean, default=True)  # Добавлено поле активности
+    messages = relationship('Message', back_populates='room')
     player = relationship('Player', back_populates='room')
 
 
@@ -37,7 +31,8 @@ class Message(Base):
                      ForeignKey('rooms.id', ondelete='CASCADE'),
                      nullable=False)
     message = Column(String, nullable=False)
-    room = relationship('Room', back_populates='message')
+    created_at = Column(DateTime, default=datetime.utcnow)  # Добавлено поле created_at
+    room = relationship('Room', back_populates='messages')
 
 
 class Player(Base):
