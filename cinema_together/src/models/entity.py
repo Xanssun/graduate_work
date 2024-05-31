@@ -5,6 +5,7 @@ from db.postgres import Base
 from sqlalchemy import (ARRAY, Boolean, Column, DateTime, ForeignKey, Integer,
                         String)
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import relationship
 
 
@@ -39,9 +40,27 @@ class Player(Base):
     __tablename__ = 'players'
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    room_id = Column(UUID(as_uuid=True),
-                     ForeignKey('rooms.id', ondelete='CASCADE'),
-                     nullable=False)
     is_active = Column(Boolean, default=False)
+    room_id = Column(UUID(as_uuid=True), ForeignKey('rooms.id'))
     view_progress = Column(Integer, nullable=False)
     room = relationship('Room', back_populates='player')
+
+
+async def save_message_to_db(session, user_id, room_id, message, created_at):
+    new_message = Message(
+        user_id=user_id,
+        room_id=room_id,
+        message=message,
+        created_at=created_at
+    )
+    session.add(new_message)
+    await session.commit()
+
+
+async def save_player_to_db(session, is_active, view_progress):
+    new_player = Player(
+        is_active=is_active,
+        view_progress=view_progress
+    )
+    session.add(new_player)
+    await session.commit()

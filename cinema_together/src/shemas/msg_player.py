@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Union
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -22,16 +23,26 @@ class BaseEvent(BaseModel):
 
 
 class PlayerSchema(BaseEvent):
+    user_id: UUID
+    is_active: bool
     type: EventType = EventType.player
     action: ActionType
+    value: int
+    view_progress: int
+
+    class Config:
+        arbitrary_types_allowed = True
+
 
 
 class ChatSchema(BaseEvent):
+    user_id: UUID
     type: EventType = EventType.chat
     message: str
 
 
 class ErrorSchema(BaseEvent):
+    user_id: UUID
     type: EventType = EventType.error
     message: str
 
