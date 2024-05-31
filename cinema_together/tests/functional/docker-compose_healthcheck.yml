@@ -1,0 +1,61 @@
+x-common:
+  &common
+    networks:
+      - praktikum-network
+    restart: always
+
+version: '3.9'
+services:
+
+  kino_db:
+    <<: *common
+    image: postgres:13.4
+    container_name: "kino_db"
+    expose:
+      - ${KINO_DB_PORT}
+    env_file:
+      - envs/common.env
+    environment:
+      POSTGRES_DB: ${KINO_DB_NAME}
+      POSTGRES_USER: ${KINO_DB_USER}
+      POSTGRES_PASSWORD: ${KINO_DB_PASSWORD}
+    volumes:
+      - kino_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${KINO_DB_NAME}", "-U", "${KINO_DB_USER}"]
+      interval: 5s
+      retries: 5
+
+  kino_service:
+    <<: *common
+    image: "kino_service"
+    build: ${API_PATH}
+    container_name: cinema_together
+    depends_on:
+      kino_db:
+        condition: service_healthy
+    env_file:
+      - envs/common.env
+    ports:
+      - ${KINO_API_PORT}:${KINO_API_PORT}
+
+  tests:
+    image: kino_service
+    container_name: tests
+    entrypoint: >
+      sh -c "pip install --no-cache-dir -r tests/functional/requirements.txt
+      && export PYTHONPATH=`pwd`
+      && python -m pytest tests/functional --asyncio-mode=auto"
+    volumes:
+      - ../../tests/:/opt/app/tests/
+    depends_on:
+      - kino_service
+    networks:
+      - praktikum-network   
+
+networks:
+  praktikum-network:
+    name: praktikum-network
+
+volumes:
+  kino_postgres_data:
