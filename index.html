@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Chat and Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #chat-container {
+            width: 30%;
+            margin: 20px auto;
+        }
+        #chat-messages {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 200px;
+            overflow-y: scroll;
+        }
+        #message-input {
+            width: calc(100% - 80px);
+            margin-right: 10px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #value-input, #view-progress-input { /* Добавлено новое поле ввода для view_progress */
+            width: 50px;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        #send-button {
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #player-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .player-button {
+            margin: 0 5px;
+            padding: 6px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container">
+        <h2>Chat</h2>
+        <div id="chat-messages"></div>
+        <div>
+            <input type="text" id="message-input" placeholder="Enter your message">
+            <button id="send-button" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <div id="player-controls">
+        <h2>Player Controls</h2>
+        <button class="player-button" onclick="sendPlayerAction('play')">Play</button>
+        <button class="player-button" onclick="sendPlayerAction('stop')">Stop</button>
+        <input type="number" id="value-input" placeholder="Value">
+        <input type="number" id="view-progress-input" placeholder="View Progress"> <!-- Новое поле ввода для view_progress -->
+        <button class="player-button" onclick="sendPlayerAction('skip_forward')">Skip Forward</button>
+        <button class="player-button" onclick="sendPlayerAction('skip_back')">Skip Back</button>
+    </div>
+
+    <script>
+        const userId = '780ab35c-96f9-45ef-ad6c-819b84e3ff14'; // Замените на ваш user_id
+        const roomId = '430e1e76-f2ed-4aa8-bf07-162d951fe58a'; // Замените на ваш room_id
+        const token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiNzgwYWIzNWMtOTZmOS00NWVmLWFkNmMtODE5Yjg0ZTNmZjE0IiwiZXhwaXJlcyI6IjIwMjQtMDUtMzEgMjM6NTg6MjQiLCJyb2xlIjpbInZpc2l0b3IiXX0.XmPli5KvoFWM05uU0_5aSkuW_wSLve_FumO1CsxSQTo'; // Замените на ваш токен
+        const wsUrl = `ws://localhost:8005/api/v1/ws/${roomId}?token=${token}`;
+        const websocket = new WebSocket(wsUrl);
+
+        websocket.onopen = function() {
+            console.log('Connected to WebSocket');
+        };
+
+        websocket.onmessage = function(event) {
+            const message = JSON.parse(event.data);
+            displayMessage(message);
+        };
+
+        websocket.onclose = function() {
+            console.log('Disconnected from WebSocket');
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById('message-input');
+            const message = {
+                type: 'message',
+                user_id: userId,
+                message: messageInput.value
+            };
+            websocket.send(JSON.stringify(message));
+            messageInput.value = '';
+        }
+
+        function sendPlayerAction(action) {
+            let is_active = true;
+            let value = 10;
+            let view_progress = 20;
+
+            if (action === 'play' || action === 'stop') {
+                is_active = action === 'play'; // Если action === 'play', is_active = true, иначе false
+            } else {
+                const valueInput = document.getElementById('value-input');
+                const viewProgressInput = document.getElementById('view-progress-input'); // Получаем элемент view_progress-input
+                value = parseInt(valueInput.value);
+                view_progress = parseInt(viewProgressInput.value); // Получаем значение из view_progress-input
+            }
+
+            const message = {
+                type: 'player',
+                user_id: userId,
+                action: action,
+                is_active: is_active,
+                value: value,
+                view_progress: view_progress
+            };
+            websocket.send(JSON.stringify(message));
+        }
+
+        function displayMessage(msg) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageElement = document.createElement('div');
+            if (msg.type === 'message') {
+                messageElement.textContent = `${msg.user_id}: ${msg.message}`;
+            } else if (msg.type === 'player') {
+                if (msg.action === 'skip_forward' || msg.action === 'skip_back') {
+                    messageElement.textContent = `Player action: ${msg.action} (${msg.value})`;
+                } else {
+                    messageElement.textContent = `Player action: ${msg.action}`;
+                }
+                // Добавляем отображение значения и прогресса просмотра
+                messageElement.textContent += `, Value: ${msg.value}, View Progress: ${msg.view_progress}`;
+            }
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

@@ -10,4 +10,4 @@ alembic -c /opt/app/alembic.ini revision --autogenerate -m "add migrations"
 alembic -c /opt/app/alembic.ini upgrade head
 
 # Запуск вашего приложения
-python3 /opt/app/main.py
+gunicorn main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8005

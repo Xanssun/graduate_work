@@ -3,7 +3,7 @@ from logging.config import fileConfig
 from alembic import context
 from core.config import settings
 from db.postgres import Base
-from models.entity import User  # файл с моделями
+from models.entity import Message, Player, Room  # файл с моделями
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides

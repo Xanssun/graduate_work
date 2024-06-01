@@ -1,26 +1,50 @@
+import logging
+from contextlib import asynccontextmanager
+from logging import config as logging_config
+
 import uvicorn
+from api.v1 import room, websocket
 from core.config import settings
-from db.postgres import async_session
+from core.logger import LOGGING
+from db import postgres
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from sqlalchemy import text
+from fastapi.responses import HTMLResponse
+from service import listener
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+logging_config.dictConfig(LOGGING)
+logger = logging.getLogger('')
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async_engine = create_async_engine(str(settings.kino_sqlalchemy_dsn), echo=True, future=True)
+    postgres.async_session = sessionmaker(
+        async_engine, class_=AsyncSession, expire_on_commit=False
+    )
+    listener.global_listener = listener.Listener()
+    await listener.global_listener.start_listening()
+    logger.info('start database connection')
+    logger.info('start listener')
+    yield
+    await postgres.async_session.close()
+    await listener.global_listener.start_listening()
+    logger.info('stop database connection')
+    logger.info('stop listener')
+
 
 app = FastAPI(
     title='API кино вместе',
     docs_url='/kino_api/openapi',
     openapi_url='/kino_api/openapi.json',
-    default_response_class=JSONResponse,
+    default_response_class=HTMLResponse,
+    lifespan=lifespan
 )
 
-@app.get("/")
-async def read_root():
-    """Проверка соеденения, тестовая функция"""
-    async with async_session() as session:
-        try:
-            await session.execute(text("SELECT 1"))
-            return {"Соединение с базой данных установлено!"}
-        except Exception as e:
-            return JSONResponse(status_code=500, content={"message": f"Ошибка подключения к базе данных: {str(e)}"})
+
+app.include_router(room.router, prefix='/kino_api/v1/cinema', tags=['cinema'])
+app.include_router(websocket.router, prefix='/api/v1/ws', tags=['websocket'])
 
 
 if __name__ == '__main__':
