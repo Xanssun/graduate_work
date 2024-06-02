@@ -29,8 +29,8 @@ services:
       - kino_db
     env_file:
       - envs/common.env
-    ports:
-      - "8005:8005"
+    expose:
+      - "8005"
 
   postgres_db:
     <<: *common
@@ -41,8 +41,6 @@ services:
     volumes:
       - auth_postgres_data:/var/lib/postgresql/data
       - ./init-databases:/docker-entrypoint-initdb.d
-    ports:
-      - "5432:5432"
     expose:
       - "5432"
 
@@ -68,8 +66,6 @@ services:
       - postgres_db
     env_file:
       - envs/common.env
-    ports:
-      - "8002:8002"
     expose:
       - "8002"
 
@@ -88,8 +84,6 @@ services:
     image: redis:7.2
     container_name: redis
     restart: always
-    ports:
-      - "6379:6379"
     expose:
       - "6379"
 
