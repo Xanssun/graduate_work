@@ -17,7 +17,7 @@ class Token:
                     token, settings.auth_secret, algorithms=['HS256']
                 )
             except Exception as error:
-                logging.error(f'Something wrong with token = {error}')
+                logging.error('Something wrong with token = %s', error)
                 decoded = {}
             if (
                 decoded.get('user_id')
@@ -55,7 +55,6 @@ class AccessBearer(HTTPBearer):
                     status_code=http.HTTPStatus.UNAUTHORIZED,
                     detail='Only Bearer token might be accepted',
                 )
-            print(credentials.credentials)
             decoded_token = self._parse_token(credentials.credentials)
             if decoded_token:
                 return decoded_token
@@ -72,7 +71,6 @@ class AccessBearer(HTTPBearer):
     @staticmethod
     def _parse_token(jwt_token: str) -> Optional[Token]:
         token = Token(token=jwt_token)
-        print(token)
         if not token.is_expired():
             return token
         return None

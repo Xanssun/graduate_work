@@ -11,8 +11,6 @@ services:
       - ./init-databases:/docker-entrypoint-initdb.d
     networks:
       - movies-network
-    ports:
-      - "5432:5432"
     expose:
       - "5432"
 
@@ -40,8 +38,6 @@ services:
       - postgres_db
     env_file:
       - envs/common.env
-    ports:
-      - "8002:8002"
     expose:
       - "8002"
 

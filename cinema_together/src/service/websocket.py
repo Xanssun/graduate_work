@@ -30,9 +30,9 @@ class WSManager:
         parsed_message = parse_message(message)
 
         if isinstance(parsed_message, ChatSchema):
-            
-            logger.info(f"Пользователь {parsed_message.user_id} отправил сообщение {parsed_message.message} в комнате {room_id}")
-            
+            logger.info(
+                f"Пользователь {parsed_message.user_id} отправил сообщение {parsed_message.message} в комнате {room_id}"
+            )
             # Получаем текущее время
             created_at = datetime.utcnow()
 
@@ -40,10 +40,14 @@ class WSManager:
             try:
                 async for session in get_session():
                     logger.info(f"Сохранение сообщения от пользователя {parsed_message.user_id} в базе данных.")
-                    await save_message_to_db(session, parsed_message.user_id, room_id, parsed_message.message, created_at)  # Передача created_at
+                    await save_message_to_db(
+                        session, parsed_message.user_id, room_id, parsed_message.message, created_at
+                    )  # Передача created_at
                     logger.info(f"Сообщение от пользователя {parsed_message.user_id} успешно сохранено в базе данных.")
             except Exception as e:
-                logger.error(f"Ошибка при сохранении сообщения от пользователя {parsed_message.user_id} в базе данных: {e}")
+                logger.error(
+                    f"Ошибка при сохранении сообщения от пользователя {parsed_message.user_id} в базе данных: {e}"
+                )
 
             await WSManager.handle_chat_message(parsed_message, room_id, websocket)
 
@@ -63,7 +67,9 @@ class WSManager:
             # Получаем сессию
             async for session in get_session():
                 await save_player_to_db(session, new_player.is_active, new_player.view_progress)
-            logger.info(f"Пользователь {parsed_message.user_id} выполнил действие {parsed_message.action} в комнате {room_id}")
+            logger.info(
+                f"Пользователь {parsed_message.user_id} выполнил действие {parsed_message.action} в комнате {room_id}"
+            )
             await WSManager.handle_player_message(parsed_message, room_id, websocket)
 
     @staticmethod

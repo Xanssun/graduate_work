@@ -2,10 +2,8 @@ import uuid
 from datetime import datetime
 
 from db.postgres import Base
-from sqlalchemy import (ARRAY, Boolean, Column, DateTime, ForeignKey, Integer,
-                        String)
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import ARRAY, Boolean, Column, DateTime, ForeignKey, Integer
+from sqlalchemy.dialects.postgresql import UUID, TEXT
 from sqlalchemy.orm import relationship
 
 
@@ -31,7 +29,7 @@ class Message(Base):
     room_id = Column(UUID(as_uuid=True),
                      ForeignKey('rooms.id', ondelete='CASCADE'),
                      nullable=False)
-    message = Column(String, nullable=False)
+    message = Column(TEXT, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)  # Добавлено поле created_at
     room = relationship('Room', back_populates='messages')
 

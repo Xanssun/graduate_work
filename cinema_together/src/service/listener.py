@@ -8,6 +8,7 @@ from core.config import settings
 
 logger = logging.getLogger('')
 
+
 class Listener:
     def __init__(self):
         self.subscribers: dict[str, list[Queue]] = {}
@@ -39,7 +40,9 @@ class Listener:
         else:
             self.listener_task.cancel()
 
+
 global_listener: Listener | None = None
+
 
 async def get_listener() -> Listener:
     return global_listener

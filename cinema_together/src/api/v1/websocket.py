@@ -8,6 +8,7 @@ from service.websocket import WSManager
 router = APIRouter()
 logger = logging.getLogger('')
 
+
 @router.websocket('/{room_id}')
 async def websocket_endpoint(
     websocket: WebSocket,
@@ -22,11 +23,10 @@ async def websocket_endpoint(
 
     q: asyncio.Queue = asyncio.Queue()
     await WSManager.connect(websocket, q, room_id)
-    logger.info(f'Пользователь {decoded_token.user_id} подключился к комнате {room_id}')
+    logger.info('Пользователь %s подключился к комнате %s', decoded_token.user_id, room_id)
     try:
         while True:
             await WSManager.receive_message(room_id, websocket)
             await WSManager.send_message(room_id, websocket, q)
     except WebSocketDisconnect:
-        logger.info(f'Пользователь {decoded_token.user_id} отключился от комнаты {room_id}')
-
+        logger.info('Пользователь %s отключился от комнаты %s', decoded_token.user_id, room_id)
